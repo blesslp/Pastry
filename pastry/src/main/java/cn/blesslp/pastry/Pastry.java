@@ -41,16 +41,12 @@ public final class Pastry {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 //用户调用的是Object的方法
-                long preTime = System.currentTimeMillis();
                 if (method.getDeclaringClass() == Object.class) {
                     return method.invoke(this, args);
                 }
                 MethodHandler methodHandler = loadMethod(method);
                 methodHandler.parseParameters(args);
-                Object adapter = methodHandler.getAdpt().adapter(Pastry.this, methodHandler);
-                long afterTime = System.currentTimeMillis();
-                System.out.println("need time : " + (afterTime-preTime));
-                return adapter;
+                return methodHandler.getAdpt().adapter(Pastry.this, methodHandler);
             }
         });
 
@@ -74,10 +70,13 @@ public final class Pastry {
 
     public static Pastry newInstance(Object invoker) {
         Pastry pastry = new Pastry();
-        pastry.target = new WeakReference<Object>(invoker);
+        pastry.target = new WeakReference(invoker);
         pastry.pastryConfig = PastryConfig.getInstance();
         if (TextUtils.isEmpty(pastry.pastryConfig.getHostUrl())) {
             throw new NullPointerException("PastryConfig必须通过setHost设置根url");
+        }
+        if (pastry.getPastryConfig().getOkHttpClient() == null) {
+            pastry.getPastryConfig().applyConfig();
         }
         return pastry;
     }
