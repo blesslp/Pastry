@@ -3,6 +3,7 @@ package cn.blesslp.pastry;
 import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.webkit.CookieManager;
 
 import com.google.gson.Gson;
 
@@ -15,6 +16,9 @@ import cn.blesslp.pastry.adpt.BeanHandler;
 import cn.blesslp.pastry.adpt.CallHandler;
 import cn.blesslp.pastry.adpt.ReturnHandler;
 import okhttp3.Cache;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -115,13 +119,12 @@ public final class PastryConfig {
         }
         okHttpClient = null;
         okHttpClient = builder.build();
-        applyDefaultConfig();
     }
 
-    private void applyDefaultConfig() {
-
-    }
-
+    /**
+     * 此处将在以后去掉
+     * !不利于扩展!
+     */
 
     private ReturnHandler callHandler = new CallHandler();
     private ReturnHandler beanHandler = new BeanHandler();

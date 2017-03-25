@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import okhttp3.FormBody;
+import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -86,6 +87,8 @@ public class RequestBuilder {
     private HashMap<String, Object> params = new HashMap<>(10);
     //multipart参数
     private HashMap<String, File> streams = new HashMap<>(10);
+    //头部参数
+    private HashMap<String, String> headers = new HashMap<>();
     private Object jsonField;
 
     public void setJsonField(Object jsonField) {
@@ -108,6 +111,10 @@ public class RequestBuilder {
         for(int i=0,len=values.length;i<len;i++) {
             addPart(key + "_" + i, values[i]);
         }
+    }
+
+    public void addHeader(String key, String value) {
+        this.headers.put(key, value);
     }
 
     public Request makeRequestBody() {
@@ -147,7 +154,7 @@ public class RequestBuilder {
     }
 
     private Request.Builder buildRequest() {
-        return new Request.Builder().url(Utils.comboURL(PastryConfig.getInstance().getHostUrl(), this.pathURL));
+        return new Request.Builder().url(Utils.comboURL(PastryConfig.getInstance().getHostUrl(), this.pathURL)).headers(Headers.of(headers));
     }
 
     private Request handleMultipart() {
@@ -156,7 +163,6 @@ public class RequestBuilder {
         builder.setType(MultipartBody.FORM);
         Set<Map.Entry<String, Object>> entries = params.entrySet();
         for (Map.Entry<String, Object> entry : entries) {
-//            builder.addFormDataPart(entry.getKey(), entry.getValue().toString());
             builder.addPart(MultipartBody.Part.createFormData(entry.getKey(), null, new JsonBody(entry.getKey(),entry.getValue().toString())));
         }
 
@@ -169,7 +175,6 @@ public class RequestBuilder {
     }
 
     private Request handleJson() {
-
         RequestBody requestBody = new JsonBody(PastryConfig.getInstance().getGson().toJson(jsonField));
         return buildRequest()
                 .post(requestBody)
@@ -183,6 +188,7 @@ public class RequestBuilder {
             builder.appendQueryParameter(entry.getKey(), entry.getValue().toString());
         }
         return new Request.Builder()
+                .headers(Headers.of(headers))
                 .url(builder.toString())
                 .build();
     }

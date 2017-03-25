@@ -68,6 +68,7 @@ public class BeanHandler extends ReturnHandler {
     }
 
     private void getMethodAndInvoke(final Object target, String methodname, Type returnType, final Object arg) {
+        if(target == null)return;
         Class<?> aClass = target.getClass();
         try {
             final Method declaredMethod = aClass.getDeclaredMethod(methodname, (Class<?>) returnType);

@@ -15,6 +15,8 @@ import java.util.Set;
 
 import cn.blesslp.pastry.annotations.FileField;
 import cn.blesslp.pastry.annotations.GET;
+import cn.blesslp.pastry.annotations.Header;
+import cn.blesslp.pastry.annotations.Headers;
 import cn.blesslp.pastry.annotations.JsonField;
 import cn.blesslp.pastry.annotations.JsonParam;
 import cn.blesslp.pastry.annotations.Mapping;
@@ -42,8 +44,8 @@ public class AnnotationHandler {
     }
 
     static {
-        methodsProcessor = Arrays.asList(new $GET(),new $POST(),new $Mapping());
-        parameterProcessor = Arrays.asList(new $Param(),new $Path(),new $JsonParam(),new $JsonField(),new $File());
+        methodsProcessor = Arrays.asList(new $GET(),new $POST(),new $Mapping(),new $Headers());
+        parameterProcessor = Arrays.asList(new $Param(),new $Path(),new $JsonParam(),new $JsonField(),new $File(),new $Header());
     }
 
     public static void processMethod(MethodHandler handler,Annotation anno,RequestBuilder builder,Object arg) {
@@ -110,6 +112,25 @@ public class AnnotationHandler {
         @Override
         boolean accept(Annotation annotation) {
             return annotation.annotationType() == Mapping.class;
+        }
+    }
+
+    static final class $Headers extends Processor {
+
+        @Override
+        void parse(MethodHandler methodHandler, Annotation annotation, RequestBuilder requestBuilder, Object arg) {
+            String[] value = ((Headers) annotation).value();
+            if(value == null || value.length == 0) return ;
+            for (String keyValuePair : value) {
+                String[] kv = keyValuePair.split("[\\:\\=]");
+                if(kv == null || kv.length == 0) throw new IllegalArgumentException(String.format("%s类中%s方法,@Headers({%s})分隔符错误.只接受[:或=]分隔符"));
+                requestBuilder.addHeader(kv[0],kv[1]);
+            }
+        }
+
+        @Override
+        boolean accept(Annotation annotation) {
+            return annotation.annotationType() == Headers.class;
         }
     }
 
@@ -237,6 +258,21 @@ public class AnnotationHandler {
         @Override
         boolean accept(Annotation annotation) {
             return annotation.annotationType() == FileField.class;
+        }
+    }
+
+    static final class $Header extends Processor {
+
+        @Override
+        void parse(MethodHandler methodHandler, Annotation annotation, RequestBuilder requestBuilder, Object arg) {
+            String key = ((Header)annotation).value();
+            if (TextUtils.isEmpty(key) || arg == null) return;
+            requestBuilder.addHeader(key, arg.toString());
+        }
+
+        @Override
+        boolean accept(Annotation annotation) {
+            return annotation.annotationType() == Header.class;
         }
     }
 
