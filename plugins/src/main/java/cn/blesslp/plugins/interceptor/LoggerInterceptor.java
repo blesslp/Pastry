@@ -1,5 +1,7 @@
 package cn.blesslp.plugins.interceptor;
 
+import android.text.TextUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.orhanobut.logger.Logger;
@@ -35,6 +37,7 @@ public class LoggerInterceptor implements Interceptor{
 
     public LoggerInterceptor(LOG_TYPE log_type) {
         this.log_type = log_type;
+        Logger.init().methodCount(0);
     }
 
     private static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -58,11 +61,21 @@ public class LoggerInterceptor implements Interceptor{
                 RequestBuilder.JsonBody temp = (RequestBuilder.JsonBody) body;
                 handle(temp,params);
             }
+            //请求头
+            Thread thread = Thread.currentThread();
+            thread.setName(request.method() +" : "+ request.url().toString());
+            Logger.json(GSON.toJson(params));
+
+            //请求结果打印和重包装
             Response proceed = chain.proceed(request);
             MediaType mediaType = proceed.body().contentType();
             String content = proceed.body().string();
-            Logger.json(GSON.toJson(params));
-            Logger.json(content);
+            //判断非法Json的情况下,直接打印
+            if (TextUtils.isEmpty(content) || (!content.trim().startsWith("{") && !content.trim().startsWith("["))) {
+                Logger.wtf(content);
+            }else {//正常返回值的情况下,格式化打印
+                Logger.json(content);
+            }
             return proceed.newBuilder().body(ResponseBody.create(mediaType,content)).build();
         }
 

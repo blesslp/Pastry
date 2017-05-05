@@ -53,16 +53,25 @@ public class ObservableHandler extends ReturnHandler<Observable> {
                        final String json = o.body().string();
                        Type genericReturnType = m.getGenericReturnType();
                        if (genericReturnType instanceof ParameterizedType) {
-                           Type callResponseType = Utils.getCallResponseType(genericReturnType);
-                           if(Utils.getRawType(callResponseType) == String.class) {
-                               return json;
-                           }
-                           return pastry.getPastryConfig().getGson().fromJson(json, callResponseType);
+                           return parseObject(json, genericReturnType, pastry);
                        }else{
                            return json;
                        }
                    }
                }).observeOn(AndroidSchedulers.mainThread());
 
+    }
+
+    private Object parseObject(String json, Type genericReturnType, Pastry pastry) {
+        Type callResponseType = Utils.getCallResponseType(genericReturnType);
+        if(Utils.getRawType(callResponseType) == String.class) {
+            return json;
+        }
+        try {
+            return pastry.getPastryConfig().getGson().fromJson(json, callResponseType);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
