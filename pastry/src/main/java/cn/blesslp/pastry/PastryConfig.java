@@ -76,7 +76,7 @@ public final class PastryConfig {
         return this;
     }
 
-    public PastryConfig addNetworkInterceptro(Interceptor interceptor) {
+    public PastryConfig addNetworkInterceptor(Interceptor interceptor) {
         networkInterceptors.add(interceptor);
         return this;
     }

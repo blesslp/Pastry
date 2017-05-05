@@ -121,3 +121,115 @@ allprojects {
 compile 'com.github.blesslp.Pastry:plugins:v1.0.3'    //自定义的一些插件,日志打印,Rxjava适配等
 compile 'com.github.blesslp.Pastry:pastry:v1.0.3'     //网络库
 ```
+##com.github.blesslp.Pastry:plugins 介绍
+##LoggerInterceptor
+####你可以这个开启,用以获得一个日志打印功能
+```
+PastryConfig.init(this)
+.setHost("http://api.com/")
+.addInterceptor(new LoggerInterceptor(LoggerInterceptor.LOG_TYPE.LOG_FULL))
+.applyConfig();
+```
+LoggerInterceptor.LOG_FULL / LoggerInterceptor.LOG_NONE
+```
+D/PRETTYLOGGER: ╔════════════════════════════════════════════════════════════════════════════════════════
+D/PRETTYLOGGER: ║ Thread: POST : http://api.com/App/User/User/get_u_member
+D/PRETTYLOGGER: ╟────────────────────────────────────────────────────────────────────────────────────────
+D/PRETTYLOGGER: ║ {
+D/PRETTYLOGGER: ║   "POST": "http:\/\/api.com\/App\/User\/User\/get_u_member",
+D/PRETTYLOGGER: ║   "member_id": "609"
+D/PRETTYLOGGER: ║ }
+D/PRETTYLOGGER: ╚════════════════════════════════════════════════════════════════════════════════════════
+D/PRETTYLOGGER: ╔════════════════════════════════════════════════════════════════════════════════════════
+D/PRETTYLOGGER: ║ Thread: POST : http://api.com/App/User/User/get_u_member
+D/PRETTYLOGGER: ╟────────────────────────────────────────────────────────────────────────────────────────
+D/PRETTYLOGGER: ║ {
+D/PRETTYLOGGER: ║   "status": "1",
+D/PRETTYLOGGER: ║   "msg": "获取成功！",
+D/PRETTYLOGGER: ║   "data": {
+D/PRETTYLOGGER: ║     "id": "609",
+D/PRETTYLOGGER: ║     "nickname": "blesslp",
+D/PRETTYLOGGER: ║     "type": "1"
+D/PRETTYLOGGER: ║   }
+D/PRETTYLOGGER: ║ }
+D/PRETTYLOGGER: ╚════════════════════════════════════════════════════════════════════════════════════════
+
+```
+## ObservableHandler
+####如果想要结合RxJava ,你可以这样
+```
+PastryConfig.init(this)
+                .setHost("http://api.com/")
+                .addInterceptor(new LoggerInterceptor(LoggerInterceptor.LOG_TYPE.LOG_FULL))
+                .setObserverHandler(new ObservableHandler())
+                .applyConfig();
+                
+
+public interface Api {
+
+    @POST("App/User/User/get_u_member")
+    public Observable<ResultBean<MemberInfo>> getMemberInfo(@Param("member_id") String memberId);
+}
+
+
+
+findViewById(R.id.btnGetMemberInfo).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                api.getMemberInfo("609").subscribe(new Consumer<ResultBean<MemberInfo>>() {
+                    @Override
+                    public void accept(@NonNull ResultBean<MemberInfo> infoResultBean) throws Exception {
+                        String nickname = infoResultBean.getData().getNickname();
+                        
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(@NonNull Throwable throwable) throws Exception {
+                        
+                    }
+                });
+            }
+        });
+```
+
+
+
+##PastryDelegate和@InjectApi
+####你可以这样将Pastry集成到你的项目的任何基类中
+```
+ * Example:
+ * public class BaseActivity {
+ *     private PastryDelegate mPastryDelegate;
+ *
+ *     public void onCreate(Bundle savedInstance) {
+ *         super.onCreate(savedInstance);
+ *         mPastryDelegate = PastryDelegate.create(this);
+ *         mPastryDelegate.autoInject();
+ *     }
+ *     
+ *     //在某个情况下取消网络请求
+ *     public void onStop() {
+ *         mPastryDelegate.cancelAll();
+ *     }
+ * }
+ * 
+ * Example2:
+ * public class LoginActivity extends BaseActivity {
+ *     @InjectApi
+ *     private LoginModel mLoginModel;
+ *     
+ *     protected void onCreate(Bundle savedInstance) {
+ *         super.onCreate(savedInstance);
+ *         setContentView(R.layout.login_activity);
+ *         findViewById(R.id.btnSubmit).setOnClickListener(view->mLoginModel.login(userName,password));
+ *     }
+ *     
+ *     //登录成功的操作
+ *     public void login(...) {
+ *         ...
+ *     }
+ *     
+ *     
+ * }
+ *
+```

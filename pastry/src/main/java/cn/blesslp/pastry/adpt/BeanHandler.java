@@ -51,13 +51,7 @@ public class BeanHandler extends ReturnHandler {
                 String json = response.body().string();
                 Type genericReturnType = m.getGenericReturnType();
                 Object bean =null;
-                if (m.isReturnVoid()) {
-                    bean = null;
-                } else if (m.isReturnBean()) {
-                    bean = pastry.getPastryConfig().getGson().fromJson(json, genericReturnType);
-                } else if (m.isReturnString()) {
-                    bean = json;
-                }
+                bean = parseObject(json, genericReturnType, bean, m, pastry);
                 Object target = pastry.getTarget().get();
                 getMethodAndInvoke(target, m.getMappingMethod(), Utils.getRawType(genericReturnType),bean);
                 call.cancel();
@@ -65,6 +59,22 @@ public class BeanHandler extends ReturnHandler {
         });
         //反射调用
         return null;
+    }
+
+    private Object parseObject(String json, Type genericReturnType, Object bean, MethodHandler m, Pastry pastry) {
+        if (m.isReturnVoid()) {
+            bean = null;
+        } else if (m.isReturnBean()) {
+            try {
+                bean = pastry.getPastryConfig().getGson().fromJson(json, genericReturnType);
+            } catch (Exception e) {
+                e.printStackTrace();
+                bean = null;
+            }
+        } else if (m.isReturnString()) {
+            bean = json;
+        }
+        return bean;
     }
 
     private void getMethodAndInvoke(final Object target, String methodname, Type returnType, final Object arg) {
