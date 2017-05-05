@@ -10,8 +10,7 @@
 8. @Header("key")String value 方法参数级别
 9. @Headers({"xx:xx",""}) 方法级别
 
-
-# 集成方法
+#   集成方法
 
 ```java
     //设置初始化配置,根路径
