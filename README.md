@@ -121,9 +121,9 @@ allprojects {
 compile 'com.github.blesslp.Pastry:plugins:v1.0.3'    //自定义的一些插件,日志打印,Rxjava适配等
 compile 'com.github.blesslp.Pastry:pastry:v1.0.3'     //网络库
 ```
-##com.github.blesslp.Pastry:plugins 介绍
-##LoggerInterceptor
-####你可以这个开启,用以获得一个日志打印功能
+##  com.github.blesslp.Pastry:plugins 介绍
+##  LoggerInterceptor
+####    你可以这个开启,用以获得一个日志打印功能
 ```
 PastryConfig.init(this)
 .setHost("http://api.com/")
@@ -155,8 +155,8 @@ D/PRETTYLOGGER: ║ }
 D/PRETTYLOGGER: ╚════════════════════════════════════════════════════════════════════════════════════════
 
 ```
-## ObservableHandler
-####如果想要结合RxJava ,你可以这样
+##  ObservableHandler
+####    如果想要结合RxJava ,你可以这样
 ```
 PastryConfig.init(this)
                 .setHost("http://api.com/")
@@ -194,8 +194,8 @@ findViewById(R.id.btnGetMemberInfo).setOnClickListener(new View.OnClickListener(
 
 
 
-##PastryDelegate和@InjectApi
-####你可以这样将Pastry集成到你的项目的任何基类中
+##  PastryDelegate和@InjectApi
+####    你可以这样将Pastry集成到你的项目的任何基类中
 ```
  * Example:
  * public class BaseActivity {
