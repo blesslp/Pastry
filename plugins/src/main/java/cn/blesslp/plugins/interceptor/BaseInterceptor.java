@@ -28,7 +28,7 @@ public abstract class BaseInterceptor implements Interceptor {
      *
      * @param request       请求体包装类
      * @param response      响应体包装类
-     * @return  Response
+     * @return  Response    如果不用处理请求相关,则原样返回Response
      */
     abstract public Response onVisit(Request request, Response response);
 
