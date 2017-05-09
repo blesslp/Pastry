@@ -20,8 +20,9 @@ public abstract class BaseInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         final Request mRequest = chain.request();
+        this.onBefore(mRequest);
         final Response mResponse = chain.proceed(mRequest);
-        return onVisit(mRequest,mResponse);
+        return this.onVisit(mRequest,mResponse);
     }
 
     /**
@@ -30,7 +31,13 @@ public abstract class BaseInterceptor implements Interceptor {
      * @param response      响应体包装类
      * @return  Response    如果不用处理请求相关,则原样返回Response
      */
-    abstract public Response onVisit(Request request, Response response);
+    public Response onVisit(Request request, Response response){
+        return response;
+    }
+
+    public void onBefore(Request request) {
+
+    }
 
     /**
      * 如果消费了Response,在返回是不行的
