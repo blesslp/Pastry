@@ -10,12 +10,15 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import cn.blesslp.pastry.adpt.BeanHandler;
 import cn.blesslp.pastry.adpt.CallHandler;
 import cn.blesslp.pastry.adpt.ReturnHandler;
+import cn.blesslp.pastry.provider.GlobalParamProvider;
 import okhttp3.Cache;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -36,6 +39,7 @@ public final class PastryConfig {
     private List<Interceptor> interceptors = new ArrayList<>();
     private List<Interceptor> networkInterceptors = new ArrayList<>();
     private static List<ReturnHandler> returnValHandlers = new ArrayList<>();
+    private HashMap<String, GlobalParamProvider> globalParamProviderHashMap = new HashMap<>();
 
     static {
         returnValHandlers.add(new CallHandler());
@@ -103,6 +107,22 @@ public final class PastryConfig {
         return this;
     }
 
+    public PastryConfig addGlobalParamProvider(String key, GlobalParamProvider globalParamProvider) {
+        globalParamProviderHashMap.put(String.valueOf(key), globalParamProvider);
+        return this;
+    }
+
+    public PastryConfig setGlobalParamProvider(GlobalParamProvider globalParamProvider) {
+        return addGlobalParamProvider(null, globalParamProvider);
+    }
+
+    protected Map<String, String> getGlobalParam(String key) {
+        if (globalParamProviderHashMap.isEmpty()) {
+            return null;
+        }
+        return globalParamProviderHashMap.get(key).provider();
+    }
+
     private void ifNullOkhttpClient() {
         if (okHttpClient == null) {
             okHttpClient = new OkHttpClient.Builder()
@@ -145,7 +165,7 @@ public final class PastryConfig {
      *
      * @return
      */
-    public List<ReturnHandler> getReturnValHandlers() {
+    protected List<ReturnHandler> getReturnValHandlers() {
         return returnValHandlers;
     }
 

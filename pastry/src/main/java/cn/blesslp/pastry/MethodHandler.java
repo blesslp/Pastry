@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import cn.blesslp.pastry.adpt.ReturnHandler;
+import cn.blesslp.pastry.annotations.GlobalParam;
 import okhttp3.Call;
 import okhttp3.Request;
 
@@ -33,13 +34,9 @@ public class MethodHandler {
     private Annotation[] methodAnnos;
     //方法参数上加的注解
     private Annotation[][] parameterAnnos;
-    private boolean isReturnString;
 
     private ReturnHandler adpt;
-
-    public void setAdpt(ReturnHandler adpt) {
-        this.adpt = adpt;
-    }
+    private Annotation[] classAnnos;
 
     public ReturnHandler getAdpt() {
         return adpt;
@@ -47,7 +44,9 @@ public class MethodHandler {
 
     public MethodHandler(Method method) {
         initial(method);
-        parseAnnotation();
+        this.mBuilder = new RequestBuilder(this);
+        this.parseAnnotation();
+        this.parseClassAnnotation();
     }
 
     public Method getPresentMethod() {
@@ -55,14 +54,30 @@ public class MethodHandler {
     }
 
     /**
-     * 解析注解
+     * 解析方法级别的注解
      */
     private void parseAnnotation() {
-        this.mBuilder = new RequestBuilder(this);
+        if (methodAnnos == null) {
+            throw new IllegalArgumentException(String.format("%s类中,%s方法的是一个普通方法", presentMethod.getDeclaringClass().getName(), presentMethod.getName()));
+        }
         for (Annotation methodAnno : methodAnnos) {
             AnnotationHandler.processMethod(this,methodAnno,this.mBuilder,null);
         }
     }
+
+    /**
+     * 解析类级别的注解
+     */
+    private void parseClassAnnotation() {
+        if (classAnnos == null) {
+
+            return;
+        }
+        for (Annotation classAnno : classAnnos) {
+            AnnotationHandler.processClass(this, classAnno, this.mBuilder, null);
+        }
+    }
+
     /**
      * 初始化不变的信息
      * @param method
@@ -72,6 +87,7 @@ public class MethodHandler {
         this.parameterAnnos = method.getParameterAnnotations();
         this.presentMethod = method;
         this.genericReturnType = method.getGenericReturnType();
+        this.classAnnos = method.getDeclaringClass().getAnnotations();
 
         List<ReturnHandler> returnValHandlers = PastryConfig.getInstance().getReturnValHandlers();
         for (ReturnHandler rh : returnValHandlers) {

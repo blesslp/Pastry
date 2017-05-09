@@ -15,6 +15,7 @@ import java.util.Set;
 
 import cn.blesslp.pastry.annotations.FileField;
 import cn.blesslp.pastry.annotations.GET;
+import cn.blesslp.pastry.annotations.GlobalParam;
 import cn.blesslp.pastry.annotations.Header;
 import cn.blesslp.pastry.annotations.Headers;
 import cn.blesslp.pastry.annotations.JsonField;
@@ -35,7 +36,7 @@ public class AnnotationHandler {
 
     private static List<? extends Processor> methodsProcessor;
     private static List<? extends Processor> parameterProcessor;
-
+    private static List<? extends Processor> classProcessor;
     private static Gson gson = new Gson();
 
     abstract static class Processor {
@@ -44,8 +45,9 @@ public class AnnotationHandler {
     }
 
     static {
-        methodsProcessor = Arrays.asList(new $GET(),new $POST(),new $Mapping(),new $Headers());
+        methodsProcessor = Arrays.asList(new $GlobalParam(),new $GET(),new $POST(),new $Mapping(),new $Headers());
         parameterProcessor = Arrays.asList(new $Param(),new $Path(),new $JsonParam(),new $JsonField(),new $File(),new $Header());
+        classProcessor = Arrays.asList(new $GlobalParam());
     }
 
     public static void processMethod(MethodHandler handler,Annotation anno,RequestBuilder builder,Object arg) {
@@ -64,9 +66,19 @@ public class AnnotationHandler {
         }
     }
 
+    public static void processClass(MethodHandler handler, Annotation anno, RequestBuilder builder, Object args) {
+        for (Processor processor : classProcessor) {
+            if (processor.accept(anno)) {
+                processor.parse(handler, anno, builder, args);
+            }
+        }
+    }
+
     /**88888888888888888888888888888888888888888888888888888888888888888888888888
      * 方法注解
      */
+
+
 
     final static class $GET extends Processor {
 
@@ -133,6 +145,30 @@ public class AnnotationHandler {
             return annotation.annotationType() == Headers.class;
         }
     }
+
+    /**88888888888888888888888888888888888888888888888888888888888888888888888888
+     * 参数注解
+     */
+    static final class $GlobalParam extends Processor {
+
+        @Override
+        void parse(MethodHandler methodHandler, Annotation annotation, RequestBuilder requestBuilder, Object arg) {
+            final String key = ((GlobalParam)annotation).value();
+            Map<String, String> globalParam = PastryConfig.getInstance().getGlobalParam(key);
+            if (globalParam != null && !globalParam.isEmpty()) {
+                Set<Map.Entry<String, String>> entries = globalParam.entrySet();
+                for (Map.Entry<String, String> entry : entries) {
+                    requestBuilder.addParam(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        @Override
+        boolean accept(Annotation annotation) {
+            return annotation.annotationType() == GlobalParam.class;
+        }
+    }
+
 
     /**88888888888888888888888888888888888888888888888888888888888888888888888888
      * 参数注解
