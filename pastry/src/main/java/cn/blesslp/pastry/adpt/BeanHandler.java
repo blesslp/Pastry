@@ -61,36 +61,44 @@ public class BeanHandler extends ReturnHandler {
         return null;
     }
 
+
     private Object parseObject(String json, Type genericReturnType, Object bean, MethodHandler m, Pastry pastry) {
-        if (m.isReturnVoid()) {
+        if (genericReturnType == Void.TYPE) {
             bean = null;
-        } else if (m.isReturnBean()) {
+        } else if (genericReturnType == String.class) {
+            bean = json;
+        }  else {
             try {
                 bean = pastry.getPastryConfig().getGson().fromJson(json, genericReturnType);
             } catch (Exception e) {
                 e.printStackTrace();
                 bean = null;
             }
-        } else if (m.isReturnString()) {
-            bean = json;
         }
         return bean;
     }
 
-    private void getMethodAndInvoke(final Object target, String methodname, Type returnType, final Object arg) {
+    private void getMethodAndInvoke(final Object target, String methodname,final Type returnType, final Object arg) {
         if(target == null)return;
         Class<?> aClass = target.getClass();
         try {
-            final Method declaredMethod = aClass.getDeclaredMethod(methodname, (Class<?>) returnType);
+            final Method declaredMethod;
+            if (returnType ==  Void.TYPE) {
+                declaredMethod = aClass.getDeclaredMethod(methodname);
+            }else{
+                declaredMethod = aClass.getDeclaredMethod(methodname, (Class<?>) returnType);
+            }
             declaredMethod.setAccessible(true);
             uiHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        declaredMethod.invoke(target, arg);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
+                        if (returnType == Void.TYPE) {
+                            declaredMethod.invoke(target);
+                        }else {
+                            declaredMethod.invoke(target, arg);
+                        }
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -99,5 +107,26 @@ public class BeanHandler extends ReturnHandler {
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(String.format("在%s中没有声明回调方法void %s(%s)",target.getClass().getName(),methodname,((Class<?>) returnType).getName()));
         }
+    }
+
+
+    /**
+     * 接受的参数
+     * @param receiveType
+     * @return  别的不要的,它都处理了
+     */
+    @Override
+    public boolean apply(Type receiveType) {
+        return true;
+    }
+
+
+    /**
+     * 接受泛型参数
+     * @return
+     */
+    @Override
+    public boolean acceptArameterizedType() {
+        return true;
     }
 }

@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +35,13 @@ public final class PastryConfig {
     private OkHttpClient okHttpClient;
     private List<Interceptor> interceptors = new ArrayList<>();
     private List<Interceptor> networkInterceptors = new ArrayList<>();
+    private static List<ReturnHandler> returnValHandlers = new ArrayList<>();
+
+    static {
+        returnValHandlers.add(new CallHandler());
+        returnValHandlers.add(new BeanHandler());
+    }
+
     private Gson gson = new Gson();
     private Context appContext;
     private String appBaseUrl;
@@ -115,46 +123,30 @@ public final class PastryConfig {
         }
 
         for (Interceptor networkInterceptor : networkInterceptors) {
-           builder.addNetworkInterceptor(networkInterceptor);
+            builder.addNetworkInterceptor(networkInterceptor);
         }
         okHttpClient = null;
         okHttpClient = builder.build();
     }
 
     /**
-     * 此处将在以后去掉
-     * !不利于扩展!
+     * 添加返回值处理器
+     *
+     * @param returnValHandler
+     * @return
      */
-
-    private ReturnHandler callHandler = new CallHandler();
-    private ReturnHandler beanHandler = new BeanHandler();
-    private ReturnHandler observerHandler;
-    private ReturnHandler flowableHandler;
-
-    public PastryConfig setObserverHandler(ReturnHandler observerHandler) {
-        this.observerHandler = observerHandler;
+    public PastryConfig addReturnValHandler(ReturnHandler returnValHandler) {
+        returnValHandlers.add(0, returnValHandler);
         return this;
     }
 
-    public PastryConfig setFlowableHandler(ReturnHandler flowableHandler) {
-        this.flowableHandler = flowableHandler;
-        return this;
-    }
-
-    public ReturnHandler provideCallHandler() {
-        return callHandler;
-    }
-
-    public ReturnHandler provideBeanHandler() {
-        return beanHandler;
-    }
-
-    public ReturnHandler provideObservableHandler() {
-        return this.observerHandler;
-    }
-
-    public ReturnHandler provideFlowableHandler() {
-        return this.flowableHandler;
+    /**
+     * 获取返回值处理器
+     *
+     * @return
+     */
+    public List<ReturnHandler> getReturnValHandlers() {
+        return returnValHandlers;
     }
 
 }

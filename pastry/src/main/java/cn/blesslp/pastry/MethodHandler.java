@@ -6,6 +6,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 
 import cn.blesslp.pastry.adpt.ReturnHandler;
 import okhttp3.Call;
@@ -20,12 +21,6 @@ import okhttp3.Request;
 
 
 public class MethodHandler {
-    private boolean isObserver;
-    private boolean isFlowable;
-    private boolean isReturnCall;
-    private boolean isReturnBean;
-    private boolean isReturnVoid;
-
     private RequestBuilder mBuilder;
 
     //映射到哪个方法
@@ -77,37 +72,32 @@ public class MethodHandler {
         this.parameterAnnos = method.getParameterAnnotations();
         this.presentMethod = method;
         this.genericReturnType = method.getGenericReturnType();
-        if (this.genericReturnType != null) {
-            if (!(this.genericReturnType instanceof ParameterizedType)) {
-                this.isReturnCall = this.genericReturnType == Call.class;
-                this.isReturnVoid = this.genericReturnType == void.class;
-                this.isReturnString = this.getGenericReturnType() == String.class;
 
+        List<ReturnHandler> returnValHandlers = PastryConfig.getInstance().getReturnValHandlers();
+        for (ReturnHandler rh : returnValHandlers) {
+            boolean isParameterizedType = (this.genericReturnType instanceof ParameterizedType);
+            if (isParameterizedType) {
+                //是泛型参数
+                if(rh.acceptArameterizedType()) {
+                    //接受泛型参数
+                    if (rh.apply(this.genericReturnType)) {
+                        this.adpt = rh;
+                        break;
+                    }
+                }
             }else{
-                try {
-                    final Class<?> flowable = Class.forName("io.reactivex.Flowable");
-                    this.isFlowable = Utils.getRawType(this.genericReturnType) == flowable;
-                    final Class<?> observal = Class.forName("io.reactivex.Observable");
-                    this.isObserver = Utils.getRawType(this.genericReturnType) == observal;
-                } catch (ClassNotFoundException e) {
-                    isReturnBean = true;
+                if (rh.apply(this.genericReturnType)) {
+                    this.adpt = rh;
+                    break;
                 }
             }
-        }
-
-        //返回类型处理器
-        if (isReturnCall) {
-            this.adpt = PastryConfig.getInstance().provideCallHandler();
-        } else if (isObserver) {
-            this.adpt = PastryConfig.getInstance().provideObservableHandler();
-        } else if(isFlowable){
-            this.adpt = PastryConfig.getInstance().provideFlowableHandler();
-        } else {
-            this.adpt = PastryConfig.getInstance().provideBeanHandler();
         }
     }
 
     public void parseParameters(Object[] args) {
+        if (args == null) {
+            return;
+        }
         for(int i=0,len = args.length;i < len;i++) {
             Annotation[] parameterAnno = this.parameterAnnos[i];
             if (parameterAnno == null || parameterAnno.length == 0) {
@@ -117,33 +107,6 @@ public class MethodHandler {
                 AnnotationHandler.processParameters(this, annotation, this.mBuilder, args[i]);
             }
         }
-    }
-
-    public boolean isFlowable() {
-        return isFlowable;
-    }
-
-    public boolean isReturnString() {
-        return isReturnString;
-    }
-
-    public boolean isObserver() {
-        return isObserver;
-    }
-
-
-    public boolean isReturnCall() {
-        return isReturnCall;
-    }
-
-
-    public boolean isReturnBean() {
-        return isReturnBean;
-    }
-
-
-    public boolean isReturnVoid() {
-        return isReturnVoid;
     }
 
 

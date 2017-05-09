@@ -1,5 +1,7 @@
 package cn.blesslp.pastry.adpt;
 
+import java.lang.reflect.Type;
+
 import cn.blesslp.pastry.MethodHandler;
 import cn.blesslp.pastry.Pastry;
 import okhttp3.Call;
@@ -21,5 +23,10 @@ public class CallHandler extends ReturnHandler<Call> {
         Call call = okHttpClient.newCall(req);
         pastry.addCaller(call);
         return call;
+    }
+
+    @Override
+    public boolean apply(Type receiveType) {
+        return receiveType == Call.class;
     }
 }
