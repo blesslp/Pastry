@@ -74,4 +74,29 @@ public class ObservableHandler extends ReturnHandler<Observable> {
             return null;
         }
     }
+
+
+    /**
+     * 接受io.reactivex.Observable
+     * @param receiveType
+     * @return
+     */
+    @Override
+    public boolean apply(Type receiveType) {
+        try {
+            final Class<?> observal = Class.forName("io.reactivex.Observable");
+            return Utils.getRawType(receiveType) == observal;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 接受泛型
+     * @return
+     */
+    @Override
+    public boolean acceptArameterizedType() {
+        return true;
+    }
 }

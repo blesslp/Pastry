@@ -73,4 +73,31 @@ public class FlowableHandler extends ReturnHandler<Flowable> {
             return null;
         }
     }
+
+
+    /**
+     * 接受io.reactivex.Flowable
+     *
+     * @param receiveType
+     * @return
+     */
+    @Override
+    public boolean apply(Type receiveType) {
+        try {
+            final Class<?> flowable = Class.forName("io.reactivex.Flowable");
+            return Utils.getRawType(receiveType) == flowable;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 接受泛型
+     *
+     * @return
+     */
+    @Override
+    public boolean acceptArameterizedType() {
+        return true;
+    }
 }
