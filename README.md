@@ -161,7 +161,7 @@ D/PRETTYLOGGER: ╚════════════════════�
 PastryConfig.init(this)
                 .setHost("http://api.com/")
                 .addInterceptor(new LoggerInterceptor(LoggerInterceptor.LOG_TYPE.LOG_FULL))
-                .setObserverHandler(new ObservableHandler())
+                .addReturnValHandler(new ObservableHandler())
                 .applyConfig();
                 
 
@@ -232,4 +232,122 @@ findViewById(R.id.btnGetMemberInfo).setOnClickListener(new View.OnClickListener(
  *     
  * }
  *
+```
+
+##  BaseInterceptor
+####    更简单的添加拦截器
+```
+
+
+public class XxxInterceptor extends BaseInterceptor {
+    @Override
+    public Request onBefore(Request request) {
+        /**
+         * 统一添加header
+         */
+        return request.newBuilder()
+                .addHeader("headerKey", "headerValue")
+                .addHeader("headerKey2","headerValue2")
+                .build();
+    }
+
+or...
+
+    @Override
+    public Request onBefore(Request request) {
+        if (!NetworkUtils.hasConnection(TheApplication.getInstance())) {
+            //无网提示
+            ...
+        }
+        return super.onBefore(request);
+    }
+}
+```
+
+##  GlobalParamProvider
+####    如果你要给某些类请求统一注入参数,那么这个将很有用
+```
+private GlobalParamProvider nullProvider = new GlobalParamProvider() {
+        @Override
+        public Map<String, String> provider() {
+            HashMap<String, String> params = new HashMap<>();
+            params.put("member_id", "123456");
+            params.put("token", "wwqofjdsklnxvoewiurewojfdslkfjdsfdo12lkdsjfsd");
+            return params;
+        }
+
+    };
+    
+  private GlobalParamProvider keyProvider = new GlobalParamProvider() {
+        @Override
+        public Map<String, String> provider() {
+            HashMap<String, String> params = new HashMap<>();
+            params.put("someParams", "1111");
+            return params;
+        }
+    };    
+```
+```
+PastryConfig.init(this)
+                ...
+                .setGlobalParamProvider(nullProvider)
+                .addGlobalParamProvider("hello",keyProvider)
+                .applyConfig();
+```
+####    怎么使用呢,
+```
+
+@GlobalParam
+public interface Api {
+...
+}
+or
+@GlobalParam("hello")
+public interface Api {
+...
+}
+```
+如此一来,Api里面的所有请求,都会被附加对应的参数,
+```
+@GlobalParam        使用了     setGlobalParamProvider(xx)  提供的map
+@GlobalParam(key)   使用了     addGlobalParamProvider(key,xx)  提供的map
+你可以定义多个,也可以给一个(api类或者方法)指定多个全局参数提供器
+```
+####    或者也可以
+```
+@GlobalParam
+public interface Api {
+
+    @GlobalParam("hello")
+    @POST("App/User/User/get_u_member")
+    public ResultBean<MemberInfo> getMemberInfo();
+}
+```
+如此一来
+```
+api.getMemberInfo() 方法将会被附加上nullProvider和keyProvider提供的所有参数
+```
+这种方法在有些时候很方便,但是我更建议和后台统一把全局参数加到header中.
+
+##  还有哪些东西?
+##  ReturnHandler
+####    它的子类:
+```
+Pastry自带的:
+    CallHandler
+    BeanHandler
+plugins内的:
+    FlowableHandler
+    ObservableHandler
+```
+```
+如果你继承它(ReturnHandler),
+PastryConfig.addReturnValHandler(加入你的处理器类)
+就可以轻松拓展Pastry
+```
+
+## 还有什么?
+####    即将开放自定义注解和注解处理器来轻松扩展Pastry
+```
+@POST , @GET , @Param("key")..
 ```
