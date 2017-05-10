@@ -347,7 +347,7 @@ PastryConfig.addReturnValHandler(加入你的处理器类)
 就可以轻松拓展Pastry
 ```
 
-## 还有什么?
+## One More Things?
 ####    即将开放自定义注解和注解处理器来轻松扩展Pastry
 ```
 @POST , @GET , @Param("key")..
