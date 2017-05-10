@@ -1,4 +1,4 @@
-package cn.blesslp.plugins.interceptor;
+package cn.blesslp.pastry.interceptor;
 
 import java.io.IOException;
 
@@ -19,8 +19,8 @@ public abstract class BaseInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        final Request mRequest = chain.request();
-        this.onBefore(mRequest);
+        Request mRequest = chain.request();
+        mRequest = this.onBefore(mRequest);
         final Response mResponse = chain.proceed(mRequest);
         return this.onVisit(mRequest,mResponse);
     }
@@ -35,8 +35,9 @@ public abstract class BaseInterceptor implements Interceptor {
         return response;
     }
 
-    public void onBefore(Request request) {
+    public Request onBefore(Request request) {
 
+        return request;
     }
 
     /**
