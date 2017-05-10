@@ -274,14 +274,14 @@ public class AnnotationHandler {
         @Override
         void parse(MethodHandler methodHandler, Annotation annotation, RequestBuilder requestBuilder, Object arg) {
             if (requestBuilder.isGet()) {
-                throw new IllegalArgumentException(String.format("方法:%s,@JsonField只能用于@POST情况",methodHandler.getPresentMethodName()));
+                throw new IllegalArgumentException(String.format("方法:%s,@FileField只能用于@POST情况",methodHandler.getPresentMethodName()));
             }
             if (arg == null) {
                 return;
             }
             String key = ((FileField)annotation).value();
             if (TextUtils.isEmpty(key)) {
-                throw new IllegalArgumentException(String.format("方法:%s,@JsonField(\'这里不能为空\')",methodHandler.getPresentMethodName()));
+                throw new IllegalArgumentException(String.format("方法:%s,@FileField(\'这里不能为空\')",methodHandler.getPresentMethodName()));
             }
             requestBuilder.setMultipart(true);
             if (arg instanceof File) {
