@@ -117,6 +117,7 @@ public class RequestBuilder {
         this.headers.put(key, value);
     }
 
+
     public Request makeRequestBody() {
         if (!isGet && !isPost && !isJson && !isMultipart) {
             throw new IllegalArgumentException(String.format("%s类中%s是一个普通方法?[无@POST,@GET等注解]",methodHandler.getPresentMethod().getDeclaringClass().getName(),methodHandler.getPresentMethodName()));
@@ -163,12 +164,13 @@ public class RequestBuilder {
         builder.setType(MultipartBody.FORM);
         Set<Map.Entry<String, Object>> entries = params.entrySet();
         for (Map.Entry<String, Object> entry : entries) {
-            builder.addPart(MultipartBody.Part.createFormData(entry.getKey(), entry.getValue().toString()));
+//            builder.addPart(MultipartBody.Part.createFormData(entry.getKey(), entry.getValue().toString()));
+            builder.addFormDataPart(entry.getKey(), null, new SingleParamBody(entry.getKey(), entry.getValue().toString()));
         }
 
         Set<Map.Entry<String, File>> streamEntries = streams.entrySet();
         for (Map.Entry<String, File> streamEntry : streamEntries) {
-            builder.addPart(MultipartBody.Part.createFormData(streamEntry.getKey(), streamEntry.getValue().getName(), RequestBody.create(MediaType.parse("multipart/form-data"),streamEntry.getValue())/*new FileBody(streamEntry.getKey(), streamEntry.getValue())*/));
+            builder.addFormDataPart(streamEntry.getKey(), streamEntry.getValue().getName(), new FileBody(streamEntry.getKey(), streamEntry.getValue()));
         }
 
         return buildRequest().post(builder.build()).build();
@@ -195,7 +197,7 @@ public class RequestBuilder {
 
     public final static class FileBody extends RequestBody {
 
-        public static final MediaType FILE = MediaType.parse("multipart/form-data");
+        public static final MediaType FILE = MediaType.parse("application/octet-stream");
 
         private File file;
         private String debugKey;
@@ -274,5 +276,37 @@ public class RequestBuilder {
         }
     }
 
+    public final static class SingleParamBody extends RequestBody {
+        private byte[] content;
+        private String debugKey;
+        private String debugValue;
+
+        public SingleParamBody(String key,String string) {
+            debugKey = key;
+            this.debugValue = string;
+            this.content = string.getBytes();
+        }
+
+        public String getDebugKey() {
+            return debugKey;
+        }
+
+        public String getDebugValue() {
+            return debugValue;
+        }
+
+        @Override
+        public MediaType contentType() {
+            return null;
+        }
+
+        @Override public long contentLength() {
+            return content.length;
+        }
+
+        @Override public void writeTo(BufferedSink sink) throws IOException {
+            sink.write(content, 0, content.length);
+        }
+    }
 
 }
