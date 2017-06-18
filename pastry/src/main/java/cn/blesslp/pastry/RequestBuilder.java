@@ -163,12 +163,12 @@ public class RequestBuilder {
         builder.setType(MultipartBody.FORM);
         Set<Map.Entry<String, Object>> entries = params.entrySet();
         for (Map.Entry<String, Object> entry : entries) {
-            builder.addPart(MultipartBody.Part.createFormData(entry.getKey(), null, new JsonBody(entry.getKey(),entry.getValue().toString())));
+            builder.addPart(MultipartBody.Part.createFormData(entry.getKey(), entry.getValue().toString()));
         }
 
         Set<Map.Entry<String, File>> streamEntries = streams.entrySet();
         for (Map.Entry<String, File> streamEntry : streamEntries) {
-            builder.addPart(MultipartBody.Part.createFormData(streamEntry.getKey(), streamEntry.getValue().getName(), new FileBody(streamEntry.getKey(), streamEntry.getValue())));
+            builder.addPart(MultipartBody.Part.createFormData(streamEntry.getKey(), streamEntry.getValue().getName(), RequestBody.create(MediaType.parse("multipart/form-data"),streamEntry.getValue())/*new FileBody(streamEntry.getKey(), streamEntry.getValue())*/));
         }
 
         return buildRequest().post(builder.build()).build();
