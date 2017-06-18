@@ -20,6 +20,7 @@ import cn.blesslp.pastry.adpt.CallHandler;
 import cn.blesslp.pastry.adpt.ReturnHandler;
 import cn.blesslp.pastry.provider.GlobalParamProvider;
 import okhttp3.Cache;
+import okhttp3.CacheControl;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
