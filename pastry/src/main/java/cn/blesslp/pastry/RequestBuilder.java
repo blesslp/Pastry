@@ -195,7 +195,7 @@ public class RequestBuilder {
 
     public final static class FileBody extends RequestBody {
 
-        public static final MediaType FILE = MediaType.parse("application/octet-stream");
+        public static final MediaType FILE = MediaType.parse("multipart/form-data");
 
         private File file;
         private String debugKey;
