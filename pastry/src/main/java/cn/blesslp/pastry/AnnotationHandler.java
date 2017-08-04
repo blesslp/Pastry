@@ -182,12 +182,11 @@ public class AnnotationHandler {
                 throw new IllegalArgumentException(String.format("方法:%s中存在@Param(\'\'),key为空的情况",methodHandler.getPresentMethodName()));
             }
             String value;
-            if(arg == null) return;
 
             if (arg instanceof String) {
-                value = arg.toString();
+                value = arg==null?"":arg.toString();
             }else{
-                value = gson.toJson(arg);
+                value = arg==null?"":gson.toJson(arg);
             }
             requestBuilder.addParam(key, value);
         }
@@ -240,7 +239,10 @@ public class AnnotationHandler {
             Set<Map.Entry<String, JsonElement>> entries = asJsonObject.entrySet();
             for (Map.Entry<String, JsonElement> entry : entries) {
                 JsonElement value = entry.getValue();
-                if(value == null || value.isJsonNull()) continue;
+                if(value == null || value.isJsonNull()) {
+                    requestBuilder.addParam(entry.getKey(),"");
+                    continue;
+                }
                 requestBuilder.addParam(entry.getKey(), value.getAsString());
             }
         }
@@ -280,6 +282,7 @@ public class AnnotationHandler {
                 return;
             }
             String key = ((FileField)annotation).value();
+            boolean splitFileArray = ((FileField)annotation).splitFileArray();
             if (TextUtils.isEmpty(key)) {
                 throw new IllegalArgumentException(String.format("方法:%s,@FileField(\'这里不能为空\')",methodHandler.getPresentMethodName()));
             }
@@ -287,7 +290,7 @@ public class AnnotationHandler {
             if (arg instanceof File) {
                 requestBuilder.addPart(key,(File)arg);
             } else if (arg instanceof File[]) {
-                requestBuilder.addPart(key, (File[]) arg);
+                requestBuilder.addPart(key, (File[]) arg,splitFileArray);
             }
         }
 

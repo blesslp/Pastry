@@ -15,4 +15,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface FileField {
     String value();
+    boolean splitFileArray() default false;
 }

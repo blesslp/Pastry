@@ -111,6 +111,7 @@ public class MethodHandler {
     }
 
     public void parseParameters(Object[] args) {
+        this.mBuilder.clearAllParams();
         if (args == null) {
             return;
         }

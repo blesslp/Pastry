@@ -104,12 +104,12 @@ public class RequestBuilder {
         this.streams.put(key, value);
     }
 
-    public void addPart(String key, File[] values) {
+    public void addPart(String key, File[] values,boolean splitFileArray) {
         if (values == null) {
             return;
         }
         for(int i=0,len=values.length;i<len;i++) {
-            addPart(key + "_" + i, values[i]);
+            addPart(splitFileArray?(key+"_"+i):key, values[i]);
         }
     }
 
@@ -193,6 +193,11 @@ public class RequestBuilder {
                 .headers(Headers.of(headers))
                 .url(builder.toString())
                 .build();
+    }
+
+    public void clearAllParams() {
+        params.clear();
+        streams.clear();
     }
 
     public final static class FileBody extends RequestBody {
