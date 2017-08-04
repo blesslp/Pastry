@@ -86,7 +86,7 @@ public class RequestBuilder {
     //普通参数
     private HashMap<String, Object> params = new HashMap<>(10);
     //multipart参数
-    private HashMap<String, File> streams = new HashMap<>(10);
+    private HashMap<String, File[]> streams = new HashMap<>(10);
     //头部参数
     private HashMap<String, String> headers = new HashMap<>();
     private Object jsonField;
@@ -101,15 +101,20 @@ public class RequestBuilder {
     }
 
     public void addPart(String key, File value) {
-        this.streams.put(key, value);
+        this.streams.put(key, new File[]{value});
     }
 
-    public void addPart(String key, File[] values,boolean splitFileArray) {
+    public void addPart(String key, File[] values, boolean splitFileArray) {
         if (values == null) {
+            this.streams.remove(key);
             return;
         }
-        for(int i=0,len=values.length;i<len;i++) {
-            addPart(splitFileArray?(key+"_"+i):key, values[i]);
+        if (!splitFileArray) {
+            this.streams.put(key, values);
+        } else {
+            for (int i = 0, len = values.length; i < len; i++) {
+                addPart((key + "_" + i), values[i]);
+            }
         }
     }
 
@@ -120,7 +125,7 @@ public class RequestBuilder {
 
     public Request makeRequestBody() {
         if (!isGet && !isPost && !isJson && !isMultipart) {
-            throw new IllegalArgumentException(String.format("%s类中%s是一个普通方法?[无@POST,@GET等注解]",methodHandler.getPresentMethod().getDeclaringClass().getName(),methodHandler.getPresentMethodName()));
+            throw new IllegalArgumentException(String.format("%s类中%s是一个普通方法?[无@POST,@GET等注解]", methodHandler.getPresentMethod().getDeclaringClass().getName(), methodHandler.getPresentMethodName()));
         }
 
         if (isGet) {
@@ -163,16 +168,21 @@ public class RequestBuilder {
         MultipartBody.Builder builder = new MultipartBody.Builder();
         builder.setType(MultipartBody.FORM);
         Set<Map.Entry<String, Object>> entries = params.entrySet();
+        //表单数据
         for (Map.Entry<String, Object> entry : entries) {
 //            builder.addPart(MultipartBody.Part.createFormData(entry.getKey(), entry.getValue().toString()));
             builder.addFormDataPart(entry.getKey(), null, new SingleParamBody(entry.getKey(), entry.getValue().toString()));
         }
 
-        Set<Map.Entry<String, File>> streamEntries = streams.entrySet();
-        for (Map.Entry<String, File> streamEntry : streamEntries) {
-            builder.addFormDataPart(streamEntry.getKey(), streamEntry.getValue().getName(), new FileBody(streamEntry.getKey(), streamEntry.getValue()));
+        //表单文件
+        Set<Map.Entry<String, File[]>> streamEntries = streams.entrySet();
+        for (Map.Entry<String, File[]> streamEntry : streamEntries) {
+            File[] files = streamEntry.getValue();
+            for (File file : files) {
+                String key = streamEntry.getKey();
+                builder.addFormDataPart(key, file.getName(), new FileBody(key, file));
+            }
         }
-
         return buildRequest().post(builder.build()).build();
     }
 
@@ -196,7 +206,7 @@ public class RequestBuilder {
     }
 
     public void clearAllParams() {
-        params.clear();
+        //清空file流
         streams.clear();
     }
 
@@ -225,7 +235,8 @@ public class RequestBuilder {
             return FILE;
         }
 
-        @Override public long contentLength() {
+        @Override
+        public long contentLength() {
             return file.length();
         }
 
@@ -249,12 +260,13 @@ public class RequestBuilder {
         private String jsonContent;
         private byte[] content;
         private String debugKey;
+
         public JsonBody(String jsonContent) {
             this.jsonContent = jsonContent;
             this.content = jsonContent.getBytes();
         }
 
-        public JsonBody(String key,String jsonContent) {
+        public JsonBody(String key, String jsonContent) {
             this(jsonContent);
             debugKey = key;
         }
@@ -272,11 +284,13 @@ public class RequestBuilder {
             return JSON;
         }
 
-        @Override public long contentLength() {
+        @Override
+        public long contentLength() {
             return content.length;
         }
 
-        @Override public void writeTo(BufferedSink sink) throws IOException {
+        @Override
+        public void writeTo(BufferedSink sink) throws IOException {
             sink.write(content, 0, content.length);
         }
     }
@@ -286,7 +300,7 @@ public class RequestBuilder {
         private String debugKey;
         private String debugValue;
 
-        public SingleParamBody(String key,String string) {
+        public SingleParamBody(String key, String string) {
             debugKey = key;
             this.debugValue = string;
             this.content = string.getBytes();
@@ -305,11 +319,13 @@ public class RequestBuilder {
             return null;
         }
 
-        @Override public long contentLength() {
+        @Override
+        public long contentLength() {
             return content.length;
         }
 
-        @Override public void writeTo(BufferedSink sink) throws IOException {
+        @Override
+        public void writeTo(BufferedSink sink) throws IOException {
             sink.write(content, 0, content.length);
         }
     }
