@@ -46,7 +46,6 @@ public class MethodHandler {
         initial(method);
         this.mBuilder = new RequestBuilder(this);
         this.parseAnnotation();
-        this.parseClassAnnotation();
     }
 
     public Method getPresentMethod() {
@@ -68,7 +67,7 @@ public class MethodHandler {
     /**
      * 解析类级别的注解
      */
-    private void parseClassAnnotation() {
+    protected void parseClassAnnotation() {
         if (classAnnos == null) {
 
             return;

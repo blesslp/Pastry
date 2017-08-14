@@ -37,7 +37,7 @@ public class AnnotationHandler {
     private static List<? extends Processor> methodsProcessor;
     private static List<? extends Processor> parameterProcessor;
     private static List<? extends Processor> classProcessor;
-    private static Gson gson = new Gson();
+    private static Gson gson = PastryConfig.getInstance().getGson();
 
     abstract static class Processor {
         abstract void parse(MethodHandler methodHandler, Annotation annotation,RequestBuilder requestBuilder,Object arg) ;

@@ -207,6 +207,7 @@ public class RequestBuilder {
 
     public void clearAllParams() {
         //清空file流
+        params.clear();
         streams.clear();
     }
 

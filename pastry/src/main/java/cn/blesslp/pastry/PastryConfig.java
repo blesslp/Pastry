@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.webkit.CookieManager;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import cn.blesslp.pastry.adpt.BeanHandler;
 import cn.blesslp.pastry.adpt.CallHandler;
 import cn.blesslp.pastry.adpt.ReturnHandler;
+import cn.blesslp.pastry.gson.NullStringToEmptyAdapterFactory;
 import cn.blesslp.pastry.provider.GlobalParamProvider;
 import okhttp3.Cache;
 import okhttp3.CacheControl;
@@ -47,7 +49,9 @@ public final class PastryConfig {
         returnValHandlers.add(new BeanHandler());
     }
 
-    private Gson gson = new Gson();
+
+
+    private Gson gson = new GsonBuilder().registerTypeAdapterFactory(new NullStringToEmptyAdapterFactory()).create();
     private Context appContext;
     private String appBaseUrl;
 
