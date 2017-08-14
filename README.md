@@ -118,8 +118,8 @@ allprojects {
 	}
 ```
 ```groovy
-compile 'com.github.blesslp.Pastry:plugins:v1.2.0'    //自定义的一些插件,日志打印,Rxjava适配等
-compile 'com.github.blesslp.Pastry:pastry:v1.2.0'     //网络库
+compile 'com.github.blesslp.Pastry:plugins:v1.2.2'    //自定义的一些插件,日志打印,Rxjava适配等
+compile 'com.github.blesslp.Pastry:pastry:v1.2.2'     //网络库
 ```
 
 ##  com.github.blesslp.Pastry:plugins 介绍

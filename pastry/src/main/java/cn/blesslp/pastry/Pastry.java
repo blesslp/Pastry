@@ -45,8 +45,8 @@ public final class Pastry {
                     return method.invoke(this, args);
                 }
                 MethodHandler methodHandler = loadMethod(method);
-                methodHandler.parseClassAnnotation();
                 methodHandler.parseParameters(args);
+                methodHandler.parseClassAnnotation();
                 return methodHandler.getAdpt().adapter(Pastry.this, methodHandler);
             }
         });
