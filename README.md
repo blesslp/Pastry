@@ -118,8 +118,8 @@ allprojects {
 	}
 ```
 ```groovy
-compile 'com.github.blesslp.Pastry:plugins:v1.1.2'    //自定义的一些插件,日志打印,Rxjava适配等
-compile 'com.github.blesslp.Pastry:pastry:v1.1.2'     //网络库
+compile 'com.github.blesslp.Pastry:plugins:v1.2.0'    //自定义的一些插件,日志打印,Rxjava适配等
+compile 'com.github.blesslp.Pastry:pastry:v1.2.0'     //网络库
 ```
 
 ##  com.github.blesslp.Pastry:plugins 介绍
@@ -351,4 +351,8 @@ PastryConfig.addReturnValHandler(加入你的处理器类)
 ####    即将开放自定义注解和注解处理器来轻松扩展Pastry
 ```
 @POST , @GET , @Param("key")..
+```
+
+```
+2017/8/14 修复 参数缓存导致null的情况下,用了旧的参数
 ```
