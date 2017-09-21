@@ -45,7 +45,6 @@ public class MethodHandler {
     public MethodHandler(Method method) {
         initial(method);
         this.mBuilder = new RequestBuilder(this);
-        this.parseAnnotation();
     }
 
     public Method getPresentMethod() {
