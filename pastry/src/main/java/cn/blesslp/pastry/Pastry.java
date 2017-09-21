@@ -45,6 +45,8 @@ public final class Pastry {
                     return method.invoke(this, args);
                 }
                 MethodHandler methodHandler = loadMethod(method);
+                //清空参数
+                methodHandler.clearParams();
                 //解析类上的注解  优先级最低
                 methodHandler.parseClassAnnotation();
                 //解析方法上的注解 优先级中

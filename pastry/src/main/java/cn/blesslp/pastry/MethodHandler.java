@@ -76,6 +76,10 @@ public class MethodHandler {
         }
     }
 
+    protected void clearParams() {
+        this.mBuilder.clearAllParams();
+    }
+
     /**
      * 初始化不变的信息
      * @param method
@@ -110,7 +114,6 @@ public class MethodHandler {
 
     public void parseParameters(Object[] args) {
         //无参数则跳出
-        this.mBuilder.clearAllParams();
         if (args == null) {
             return;
         }
