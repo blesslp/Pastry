@@ -45,8 +45,12 @@ public final class Pastry {
                     return method.invoke(this, args);
                 }
                 MethodHandler methodHandler = loadMethod(method);
-                methodHandler.parseParameters(args);
+                //解析类上的注解  优先级最低
                 methodHandler.parseClassAnnotation();
+                //解析方法上的注解 优先级中
+                methodHandler.parseAnnotation();
+                //解析参数上的注解  优先级最高
+                methodHandler.parseParameters(args);
                 return methodHandler.getAdpt().adapter(Pastry.this, methodHandler);
             }
         });

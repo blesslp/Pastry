@@ -55,7 +55,7 @@ public class MethodHandler {
     /**
      * 解析方法级别的注解
      */
-    private void parseAnnotation() {
+    protected void parseAnnotation() {
         if (methodAnnos == null) {
             throw new IllegalArgumentException(String.format("%s类中,%s方法的是一个普通方法", presentMethod.getDeclaringClass().getName(), presentMethod.getName()));
         }
