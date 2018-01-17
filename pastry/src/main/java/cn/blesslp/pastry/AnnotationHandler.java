@@ -239,8 +239,13 @@ public class AnnotationHandler {
             Set<Map.Entry<String, JsonElement>> entries = asJsonObject.entrySet();
             for (Map.Entry<String, JsonElement> entry : entries) {
                 JsonElement value = entry.getValue();
-                if(value == null || value.isJsonNull()) {
+
+                if (value == null || value.isJsonNull()) {
                     requestBuilder.addParam(entry.getKey(),"");
+                    continue;
+                }
+                if (value.isJsonObject() || value.isJsonArray()) {
+                    requestBuilder.addParam(entry.getKey(), value.toString());
                     continue;
                 }
                 requestBuilder.addParam(entry.getKey(), value.getAsString());
