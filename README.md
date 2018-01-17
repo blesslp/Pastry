@@ -359,3 +359,6 @@ PastryConfig.addReturnValHandler(加入你的处理器类)
 ```
 2017/9/21 修复方法级注解的参数被缓存的情况
 ```
+```
+2018/1/17 修复@JsonParam内部有List的情况下的参数拆分错误
+```
